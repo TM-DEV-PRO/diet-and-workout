@@ -3,714 +3,500 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Personalized Health Plan</title>
-    <!-- Chosen Palette: Warm Neutral & Calm Green -->
-    <!-- Application Structure Plan: A single-page application (SPA) with a 4-tab navigation (Home, Nutrition, Exercise, Principles). This structure is intuitive, like a mobile app, making it easy to find information. The 'Home' tab features a key interactive element: a weight tracker (Chart.js) to motivate and log progress. 'Nutrition' and 'Exercise' use interactive modals and toggles to present the personalized plan without overwhelming the user. 'Principles' uses an accordion to answer key 'Why?' questions (re: BP, cholesterol, loose skin), which is crucial for user education and adherence. This design transforms the static source report (the images) into a dynamic, personalized, and actionable tool. -->
-    <!-- Visualization & Content Choices: 
-        1. Report Info: User weight (107kg) & goal. Goal: Track progress. Viz: Line Chart (Chart.js). Interaction: User inputs weight, JS array updates, chart re-renders. Justification: Visual feedback is highly motivational. Library: Chart.js.
-        2. Report Info: Diet Plan (images). Goal: Personalize for BP/Cholesterol. Viz: Grid of clickable meal cards. Interaction: Clicking a card opens a modal (toggled JS div) with personalized options and 'why' explanations. Justification: Breaks down the day, modals provide detail without clutter. Library: Vanilla JS.
-        3. Report Info: Exercise Plan (images). Goal: Provide a structured week. Viz: 7-day toggle buttons. Interaction: Clicking a button shows/hides the plan for that day. Justification: Clear, common UI for weekly schedules. Library: Vanilla JS.
-        4. Report Info: User's 'Why' questions. Goal: Educate on BP, loose skin, spot reduction. Viz: Accordion list. Interaction: Clicking a question toggles the answer div. Justification: Hides text-heavy info until requested, keeping the UI clean. Library: Vanilla JS.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-    
+    <title>Master Weight-Loss & Body-Recomposition System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #fdfdfb; /* Warm light neutral */
-            color: #333;
-        }
-        .nav-active {
-            border-bottom-color: #059669; /* Green accent */
-            color: #059669;
-            font-weight: 600;
-        }
-        .nav-item {
-            border-bottom: 2px solid transparent;
-        }
-        .page {
-            display: none;
-        }
-        .page.active {
-            display: block;
-        }
-        .hidden {
-            display: none;
-        }
-        /* Modal Styles */
-        .modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 40;
-        }
-        .modal-content {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            z-index: 50;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        /* Accordion Styles */
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        .accordion-content.open {
-            max-height: 500px; /* Adjust as needed */
-            transition: max-height 0.3s ease-in;
-        }
-
-        /* Chart Container */
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 300px;
-            max-height: 400px;
-        }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 350px;
-            }
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .nav-active { border-bottom: 3px solid #059669; color: #059669; font-weight: 800; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .upgrade-card { border-left: 4px solid #059669; background: #f0fdf4; }
+        .pdf-ref { font-size: 0.7rem; color: #64748b; font-style: italic; display: block; margin-top: 4px; }
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-content { background: white; border-radius: 1rem; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 2rem; position: relative; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out; }
+        .accordion-content.open { max-height: 1200px; padding-bottom: 1rem; }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-10">
+    <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4">
-            <h1 class="text-2xl md:text-3xl font-bold text-emerald-700 text-center">Your Personalized Health Plan</h1>
-            <p class="text-center text-gray-600">A Safe & Sustainable Plan for You</p>
+            <h1 class="text-xl md:text-2xl font-extrabold text-emerald-900 text-center uppercase tracking-tight">
+                Master Weight-Loss & Health System
+            </h1>
+            <p class="text-center text-xs text-gray-500 font-medium">VERBATIM PRESERVED + COACH UPGRADES</p>
         </div>
-        
-        <!-- Navigation -->
-        <nav class="bg-white shadow-md">
-            <div class="container mx-auto flex justify-around items-center max-w-2xl">
-                <button class="nav-item py-3 px-4 text-sm md:text-base text-gray-700 hover:text-emerald-600 transition-colors" data-page="home">
-                    Home
-                </button>
-                <button class="nav-item py-3 px-4 text-sm md:text-base text-gray-700 hover:text-emerald-600 transition-colors" data-page="nutrition">
-                    Nutrition
-                </button>
-                <button class="nav-item py-3 px-4 text-sm md:text-base text-gray-700 hover:text-emerald-600 transition-colors" data-page="exercise">
-                    Exercise
-                </button>
-                <button class="nav-item py-3 px-4 text-sm md:text-base text-gray-700 hover:text-emerald-600 transition-colors" data-page="principles">
-                    Principles
-                </button>
+        <nav class="border-t bg-white overflow-x-auto">
+            <div class="container mx-auto flex justify-around min-w-[500px]">
+                <button class="nav-item py-4 px-4 text-xs font-bold uppercase tracking-widest nav-active" data-page="home">Roadmap</button>
+                <button class="nav-item py-4 px-4 text-xs font-bold uppercase tracking-widest" data-page="exercise">Exercise</button>
+                <button class="nav-item py-4 px-4 text-xs font-bold uppercase tracking-widest" data-page="nutrition">Nutrition</button>
+                <button class="nav-item py-4 px-4 text-xs font-bold uppercase tracking-widest" data-page="principles">Principles</button>
             </div>
         </nav>
     </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto p-4 md:p-6 max-w-4xl">
+    <main class="container mx-auto p-4 max-w-4xl pb-24">
 
-        <!-- Page: Home -->
+        <!-- PAGE 1: ROADMAP & CONTEXT -->
         <div id="home-page" class="page active space-y-6">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-bold text-emerald-700 mb-3">Welcome to Your Journey!</h2>
-                <p class="text-gray-700 mb-4">
-                    This plan is designed specifically for you, taking into account your current weight, height, and health conditions (High BP & Cholesterol). We've adapted the plan you shared to make it safer and more effective.
-                </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-                    <div class="bg-emerald-50 p-4 rounded-lg">
-                        <div class="text-sm text-emerald-800">Your Stats</div>
-                        <div class="text-lg font-semibold">107 kg / 5.5 ft</div>
-                    </div>
-                    <div class="bg-red-50 p-4 rounded-lg">
-                        <div class="text-sm text-red-800">Health Focus</div>
-                        <div class="text-lg font-semibold">High BP & Cholesterol</div>
-                    </div>
-                </div>
-                <div class="bg-green-50 p-4 rounded-lg mt-4">
-                    <div class="text-sm text-green-800">Daily Calorie Target</div>
-                    <div class="text-xl font-bold text-green-700">~1700 - 1800 kcal</div>
-                    <p class="text-xs text-gray-600 mt-1">This creates a safe deficit for sustainable weight loss (0.5-1kg per week).</p>
-                </div>
-            </div>
             
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-bold text-emerald-700 mb-4">Track Your Progress</h2>
-                <p class="text-gray-600 mb-4">Seeing your progress is motivating! Weigh yourself once a week (e.g., every Saturday morning) and add it here.</p>
-                <div class="chart-container mb-4">
+            <!-- Verbatim 1: Starting Point -->
+            <section class="bg-white p-6 rounded-2xl shadow-sm">
+                <h2 class="text-xl font-extrabold text-slate-800 mb-4">1. Your Starting Point (Important Context)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2 text-sm">
+                        <p><strong>Height:</strong> 5’5” (165 cm)</p>
+                        <p><strong>Weight:</strong> 107 kg</p>
+                        <p><strong>Age:</strong> 27</p>
+                        <p><strong>Lifestyle:</strong> Sedentary (software engineer)</p>
+                        <p><strong>Diet:</strong> Vegetarian + Non-veg (flexible)</p>
+                        <p><strong>Smoking:</strong> No (big advantage)</p>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                        <h3 class="font-bold text-emerald-800 text-xs uppercase mb-2">Estimated Stats</h3>
+                        <p class="text-sm">BMR: ~1,900 kcal/day</p>
+                        <p class="text-sm">Maintenance: ~2,500–2,700 kcal/day</p>
+                        <p class="text-md font-bold text-emerald-700 mt-2">Target Intake: 1,600–1,750 kcal/day</p>
+                        <p class="text-xs text-emerald-600">Expected fat loss: 0.6–0.8 kg/week</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Verbatim 2: Big Rules -->
+            <section class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-red-500">
+                <h2 class="text-xl font-extrabold text-slate-800 mb-4 text-center">2. BIG RULES (Read This First)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-red-50 p-4 rounded-xl">
+                        <h3 class="font-bold text-red-700 mb-2">❌ What NOT to do</h3>
+                        <ul class="text-sm space-y-1 text-red-800">
+                            <li>• Crash diets (<1200 kcal)</li>
+                            <li>• Only cardio</li>
+                            <li>• Skipping protein</li>
+                            <li>• Losing weight too fast</li>
+                        </ul>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-xl">
+                        <h3 class="font-bold text-emerald-700 mb-2">✅ What we WILL do</h3>
+                        <ul class="text-sm space-y-1 text-emerald-800">
+                            <li>• High protein (Muscle & Skin)</li>
+                            <li>• Strength training (Tighten Skin)</li>
+                            <li>• Low-GI Indian foods</li>
+                            <li>• Walking + Zone-2 cardio</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress Tracker -->
+            <section class="bg-white p-6 rounded-2xl shadow-sm">
+                <h2 class="text-xl font-extrabold text-slate-800 mb-4">Weight Progress</h2>
+                <div class="h-[300px] w-full mb-4">
                     <canvas id="weightChart"></canvas>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="number" id="weightInput" placeholder="Enter today's weight (in kg)" class="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <button id="addWeightBtn" class="bg-emerald-600 text-white font-semibold py-3 px-5 rounded-lg hover:bg-emerald-700 transition-colors">
-                        Add Weight
-                    </button>
+                <div class="flex gap-2">
+                    <input type="number" id="weightInput" placeholder="Log kg..." class="flex-1 p-3 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <button id="addWeightBtn" class="bg-emerald-600 text-white px-8 rounded-xl font-bold">Add</button>
                 </div>
-                <div id="weightError" class="text-red-600 text-sm mt-2 hidden"></div>
-            </div>
-        </div>
+            </section>
 
-        <!-- Page: Nutrition -->
-        <div id="nutrition-page" class="page space-y-6">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-bold text-emerald-700 mb-3">Your Heart-Healthy Nutrition Plan</h2>
-                <p class="text-gray-700 mb-4">
-                    This plan is based on the one you shared, but with crucial modifications for High BP and Cholesterol. This means:
-                    <span class="font-semibold text-red-600">Low Sodium:</span> Avoid pickles, papad, processed foods, and added salt.
-                    <span class="font-semibold text-blue-600">High Fiber & Healthy Fats:</span> Focus on vegetables, fruits, dals, oats, and use minimal, healthy oils.
-                </p>
-                <p class="text-gray-700 mb-6">Click on any meal to see your personalized options and the 'why' behind them.</p>
-
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <!-- Meal Cards -->
-                    <div class="meal-card bg-emerald-50 p-4 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow" data-modal="modal-early">
-                        <h3 class="font-bold text-emerald-800">Early Morning</h3>
-                        <p class="text-sm text-gray-600">6:00 - 6:30 AM</p>
-                    </div>
-                    <div class="meal-card bg-emerald-50 p-4 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow" data-modal="modal-breakfast">
-                        <h3 class="font-bold text-emerald-800">Breakfast</h3>
-                        <p class="text-sm text-gray-600">8:00 - 8:30 AM</p>
-                    </div>
-                    <div class="meal-card bg-emerald-50 p-4 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow" data-modal="modal-mid-snack">
-                        <h3 class="font-bold text-emerald-800">Mid-Morning Snack</h3>
-                        <p class="text-sm text-gray-600">11:00 AM</p>
-                    </div>
-                    <div class="meal-card bg-emerald-50 p-4 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow" data-modal="modal-lunch">
-                        <h3 class="font-bold text-emerald-800">Lunch</h3>
-                        <p class="text-sm text-gray-600">1:00 - 1:30 PM</p>
-                    </div>
-                    <div class="meal-card bg-emerald-50 p-4 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow" data-modal="modal-eve-snack">
-                        <h3 class="font-bold text-emerald-800">Evening Snack</h3>
-                        <p class="text-sm text-gray-600">4:00 - 4:30 PM</p>
-                    </div>
-                    <div class="meal-card bg-emerald-50 p-4 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow" data-modal="modal-dinner">
-                        <h3 class="font-bold text-emerald-800">Dinner</h3>
-                        <p class="text-sm text-gray-600">7:00 - 7:30 PM</p>
-                    </div>
-                    <div class="meal-card bg-emerald-50 p-4 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow col-span-2 md:col-span-1" data-modal="modal-bedtime">
-                        <h3 class="font-bold text-emerald-800">Bedtime</h3>
-                        <p class="text-sm text-gray-600">9:00 - 9:30 PM</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Page: Exercise -->
-        <div id="exercise-page" class="page space-y-6">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-bold text-emerald-700 mb-3">Your Weekly Exercise Plan</h2>
-                <p class="text-gray-700 mb-4">
-                    This plan combines Cardio (for fat loss & heart health), Strength (to build muscle & prevent loose skin), and Flexibility. Start slowly and listen to your body.
-                </p>
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <button class="ex-day-btn bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg" data-day="day1">Day 1</button>
-                    <button class="ex-day-btn bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg" data-day="day2">Day 2</button>
-                    <button class="ex-day-btn bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg" data-day="day3">Day 3</button>
-                    <button class="ex-day-btn bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg" data-day="day4">Day 4</button>
-                    <button class="ex-day-btn bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg" data-day="day5">Day 5</button>
-                    <button class="ex-day-btn bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg" data-day="day6">Day 6</button>
-                    <button class="ex-day-btn bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg" data-day="day7">Day 7</button>
-                </div>
-
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <!-- Day 1 Content -->
-                    <div id="day1" class="workout-day space-y-3">
-                        <h3 class="text-xl font-bold text-emerald-700">Day 1: Cardio & Flexibility</h3>
-                        <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">1. Cardio (30-45 mins)</h4>
-                            <p class="text-sm text-gray-600">Brisk Walking, Cycling, or Cross-Trainer. Start at a pace you can maintain.</p>
-                            <p class="text-sm font-medium text-blue-600 mt-1">Why: Burns calories and strengthens your heart. Crucial for BP and cholesterol management.</p>
-                        </div>
-                        <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">2. Flexibility (10 mins)</h4>
-                            <p class="text-sm text-gray-600">Gentle full-body stretching. Hold each stretch for 20-30 seconds. Do not bounce.</p>
-                            <p class="text-sm font-medium text-blue-600 mt-1">Why: Reduces risk of injury, improves blood flow, and helps with muscle soreness.</p>
-                        </div>
-                    </div>
-                    <!-- Day 2 Content -->
-                    <div id="day2" class="workout-day hidden space-y-3">
-                        <h3 class="text-xl font-bold text-emerald-700">Day 2: Strength & Flexibility</h3>
-                        <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">1. Strength Training (20-30 mins)</h4>
-                            <p class="text-sm text-gray-600">3 sets of 10-12 reps: Bodyweight Squats, Lunges (or half-lunges), Wall Push-ups (easier on joints), Plank (hold for 20-30 secs), Dumbbell Rows (use light dumbbells or water bottles).</p>
-                            <p class="text-sm font-medium text-blue-600 mt-1">Why: Builds muscle, which burns calories even at rest. This is KEY to preventing loose skin.</p>
-                        </div>
-                        <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">2. Flexibility (10 mins)</h4>
-                            <p class="text-sm text-gray-600">Full-body stretching. Focus on chest, back, and legs.</p>
-                        </div>
-                    </div>
-                    <!-- Day 3 Content -->
-                    <div id="day3" class="workout-day hidden space-y-3">
-                        <h3 class="text-xl font-bold text-emerald-700">Day 3: Cardio & Flexibility</h3>
-                         <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">1. Cardio (35-40 mins)</h4>
-                            <p class="text-sm text-gray-600">Try to slightly increase your pace or duration from Day 1. Brisk Walking, Jogging (if comfortable), or Swimming.</p>
-                            <p class="text-sm font-medium text-blue-600 mt-1">Why: Builds cardiovascular endurance and burns overall body fat.</p>
-                        </div>
-                        <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">2. Flexibility (10 mins)</h4>
-                            <p class="text-sm text-gray-600">Gentle full-body stretching.</p>
-                        </div>
-                    </div>
-                    <!-- Day 4 Content -->
-                    <div id="day4" class="workout-day hidden space-y-3">
-                        <h3 class="text-xl font-bold text-emerald-700">Day 4: Strength & Flexibility</h3>
-                        <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">1. Strength Training (20-30 mins)</h4>
-                            <p class="text-sm text-gray-600">3 sets of 10-12 reps: Repeat Day 2 exercises. Try to improve your form or increase reps slightly.</p>
-                            <p class="text-sm font-medium text-blue-600 mt-1">Why: Consistency builds muscle. This metabolic boost is essential for long-term weight loss.</p>
-                        </div>
-                        <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">2. Flexibility (10 mins)</h4>
-                            <p class="text-sm text-gray-600">Full-body stretching.</p>
-                        </div>
-                    </div>
-                    <!-- Day 5 Content -->
-                    <div id="day5" class="workout-day hidden space-y-3">
-                        <h3 class="text-xl font-bold text-emerald-700">Day 5: Cardio & Flexibility</h3>
-                         <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">1. Cardio (40-45 mins)</h4>
-                            <p class="text-sm text-gray-600">Push yourself a little, but listen to your body. Brisk Walking, Cycling, or Swimming.</p>
-                            <p class="text-sm font-medium text-blue-600 mt-1">Why: Continues to improve heart health and burn calories effectively.</p>
-                        </div>
-                        <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">2. Flexibility (10 mins)</h4>
-                            <p class="text-sm text-gray-600">Gentle full-body stretching.</p>
-                        </div>
-                    </div>
-                    <!-- Day 6 Content -->
-                    <div id="day6" class="workout-day hidden space-y-3">
-                        <h3 class="text-xl font-bold text-emerald-700">Day 6: Strength & Core</h3>
-                        <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">1. Strength Training (20-30 mins)</h4>
-                            <p class="text-sm text-gray-600">3 sets of 10-12 reps: Squats, Lunges, Wall Push-ups, Dumbbell Rows, Plank (try 2-3 sets).</p>
-                        </div>
-                        <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">2. Core Focus (5-10 mins)</h4>
-                            <p class="text-sm text-gray-600">Crunches (gentle), Leg Raises (modified), Bird-Dog. This helps strengthen the "over flat" area you mentioned.</p>
-                            <p class="text-sm font-medium text-blue-600 mt-1">Why: A strong core supports your back and improves posture, making your stomach appear flatter.</p>
-                        </div>
-                    </div>
-                    <!-- Day 7 Content -->
-                    <div id="day7" class_name="workout-day hidden space-y-3">
-                        <h3 class="text-xl font-bold text-emerald-700">Day 7: Active Recovery or Rest</h3>
-                        <div class="p-3 bg-white rounded-lg border">
-                            <h4 class="font-semibold text-gray-800">Rest or Light Activity</h4>
-                            <p class="text-sm text-gray-600">Listen to your body. You can take a full rest day, or go for a light 20-30 minute walk.</p>
-                            <p class="text-sm font-medium text-blue-600 mt-1">Why: Your muscles need time to repair and grow stronger. Rest is not lazy, it's productive!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Page: Principles -->
-        <div id="principles-page" class="page space-y-6">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-bold text-emerald-700 mb-3">Your Key Questions Answered ("The Why")</h2>
-                <p class="text-gray-700 mb-4">
-                    Understanding *why* you're doing something is key to success. Here are the principles behind your plan.
-                </p>
-                
-                <!-- Accordion -->
+            <!-- Timeline -->
+            <section class="bg-white p-6 rounded-2xl shadow-sm">
+                <h2 class="text-xl font-extrabold text-slate-800 mb-4">11. Expected Timeline</h2>
                 <div class="space-y-3">
-                    <!-- Item 1 -->
+                    <div class="flex justify-between p-3 border-b text-sm"><span>2 Weeks</span><span class="font-medium">Energy improves, bloating reduces</span></div>
+                    <div class="flex justify-between p-3 border-b text-sm"><span>4 Weeks</span><span class="font-medium">3–4 kg fat loss</span></div>
+                    <div class="flex justify-between p-3 border-b text-sm"><span>8 Weeks</span><span class="font-medium">Clothes fit loose, face slimmer</span></div>
+                    <div class="flex justify-between p-3 border-b text-sm"><span>12 Weeks</span><span class="font-bold text-emerald-600">8–10 kg loss, skin still tight</span></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PAGE 2: EXERCISE PLAN -->
+        <div id="exercise-page" class="page space-y-6">
+            
+            <!-- Verbatim: Exercise Header -->
+            <section class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-extrabold mb-2">3. Daily Exercise Plan</h2>
+                <p class="text-emerald-400 font-bold mb-4 uppercase text-xs tracking-widest">MOST IMPORTANT FOR LOOSE SKIN</p>
+                
+                <div class="grid grid-cols-7 gap-1 text-[10px] md:text-xs text-center mb-4">
+                    <div class="p-2 border border-slate-700 rounded bg-slate-800">Mon<br>Strength</div>
+                    <div class="p-2 border border-slate-700 rounded bg-slate-800">Tue<br>Cardio</div>
+                    <div class="p-2 border border-slate-700 rounded bg-slate-800">Wed<br>Strength</div>
+                    <div class="p-2 border border-slate-700 rounded bg-slate-800">Thu<br>Active</div>
+                    <div class="p-2 border border-slate-700 rounded bg-slate-800">Fri<br>Strength</div>
+                    <div class="p-2 border border-slate-700 rounded bg-slate-800">Sat<br>Long</div>
+                    <div class="p-2 border border-slate-700 rounded bg-slate-800">Sun<br>Rest</div>
+                </div>
+            </section>
+
+            <!-- Verbatim: Strength Training Details -->
+            <section class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-emerald-500">
+                <h2 class="text-xl font-extrabold text-slate-800 mb-4">4. Strength Training (3 Days / Week)</h2>
+                <p class="text-sm italic text-gray-500 mb-4">"This is NON-NEGOTIABLE for skin tightening"</p>
+                
+                <div class="space-y-6">
                     <div>
-                        <button class="accordion-toggle flex justify-between items-center w-full p-4 bg-emerald-50 rounded-lg text-left font-semibold text-emerald-800 hover:bg-emerald-100">
-                            <span>How does this plan help my High BP & Cholesterol?</span>
-                            <span>&#9660;</span>
-                        </button>
-                        <div class="accordion-content">
-                            <div class="p-4 bg-gray-50 border rounded-b-lg">
-                                <p class="text-gray-700">This is our #1 priority. The plan attacks this in three ways:</p>
-                                <ul class="list-disc list-inside mt-2 space-y-1">
-                                    <li><span class="font-semibold">Low Sodium:</span> By avoiding added salt, pickles, and processed foods, we directly reduce the strain on your blood vessels, helping lower BP.</li>
-                                    <li><span class="font-semibold">High Fiber:</span> Oats, dals, salads, and fruits contain soluble fiber, which acts like a sponge and helps *remove* bad cholesterol (LDL) from your body.</li>
-                                    <li><span class="font-semibold">Healthy Fats & Exercise:</span> Using less oil and choosing lean protein (chicken, fish, dal) reduces bad fat intake. Cardio exercise further improves your good cholesterol (HDL).</li>
-                                </ul>
+                        <h3 class="font-bold text-emerald-800 mb-2">Full Body Workout (45–50 min)</h3>
+                        <div class="bg-slate-50 p-4 rounded-xl space-y-3 text-sm">
+                            <p><strong>Warm-up (5 min):</strong> Arm/Hip circles, Bodyweight squats × 15, Marching in place × 2 min</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="p-2 bg-white border rounded">Squats — 3 × 12</div>
+                                <div class="p-2 bg-white border rounded">Push-ups (Wall/Knee) — 3 × 8–12</div>
+                                <div class="p-2 bg-white border rounded">Dumbbell Rows — 3 × 12</div>
+                                <div class="p-2 bg-white border rounded">Glute bridges — 3 × 15</div>
+                                <div class="p-2 bg-white border rounded">Shoulder press — 3 × 10</div>
+                                <div class="p-2 bg-white border rounded">Plank — 3 × 20–40 sec</div>
                             </div>
                         </div>
                     </div>
-                    <!-- Item 2 -->
-                    <div>
-                        <button class="accordion-toggle flex justify-between items-center w-full p-4 bg-emerald-50 rounded-lg text-left font-semibold text-emerald-800 hover:bg-emerald-100">
+                    <div class="bg-emerald-50 p-4 rounded-xl">
+                        <h4 class="font-bold text-emerald-800 text-sm mb-1 uppercase">Why this prevents loose skin:</h4>
+                        <ul class="text-xs space-y-1 text-emerald-900">
+                            <li>• Builds muscle under the skin</li>
+                            <li>• Improves collagen signaling</li>
+                            <li>• Prevents “deflated” look after fat loss</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Verbatim: Cardio -->
+            <section class="bg-white p-6 rounded-2xl shadow-sm">
+                <h2 class="text-xl font-extrabold text-slate-800 mb-4">5. Cardio (Fat Loss Without Stress)</h2>
+                <div class="space-y-4">
+                    <div class="p-4 bg-slate-50 rounded-xl">
+                        <h3 class="font-bold text-slate-800 text-sm">Daily Walking (Very Powerful)</h3>
+                        <p class="text-sm text-gray-600">8,000–10,000 steps/day. Prefer morning or post-dinner.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl">
+                        <h3 class="font-bold text-slate-800 text-sm">Zone-2 Cardio (2 Days / Week)</h3>
+                        <p class="text-sm text-gray-600">Brisk walking / cycling (30–40 min). Can talk but not sing.</p>
+                    </div>
+                    <p class="text-red-600 font-bold text-xs uppercase">❌ No daily HIIT (raises cortisol → belly fat)</p>
+                </div>
+            </section>
+
+            <!-- Coach Upgrade: Cardio/HIIT Integration -->
+            <section class="upgrade-card p-6 rounded-2xl shadow-sm">
+                <div class="flex justify-between items-start mb-2">
+                    <h2 class="text-lg font-bold text-emerald-900">13. Smart Weekly Cardio Upgrade</h2>
+                    <span class="bg-emerald-600 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Coach Upgrade</span>
+                </div>
+                <p class="text-xs text-emerald-800 mb-4">Adapted intelligently from PDF (Pages 1-3):</p>
+                <ul class="text-sm space-y-2 text-emerald-900">
+                    <li><strong>Mon:</strong> Strength + optional short HIIT finisher (5–8 min max)</li>
+                    <li><strong>Wed:</strong> Moderate steady cardio (40–45 min)</li>
+                    <li><strong>Sat:</strong> Long walk or cycle (60–75 min, last 20 min slow)</li>
+                </ul>
+            </section>
+
+            <!-- Coach Upgrade: NEAT -->
+            <section class="upgrade-card p-6 rounded-2xl shadow-sm">
+                <h2 class="text-lg font-bold text-emerald-900 mb-1">17. “Fat Loss on Autopilot” (NEAT SYSTEM)</h2>
+                <span class="pdf-ref">From PDF pages 11–12</span>
+                <ul class="text-sm space-y-1 text-emerald-900 mt-3">
+                    <li>• Walk 10–15 min after meals</li>
+                    <li>• Take calls while walking</li>
+                    <li>• Do chores yourself / Use stairs</li>
+                </ul>
+            </section>
+        </div>
+
+        <!-- PAGE 3: NUTRITION PLAN -->
+        <div id="nutrition-page" class="page space-y-6">
+            
+            <!-- Verbatim: Diet Rules -->
+            <section class="bg-emerald-700 text-white p-6 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-extrabold mb-1">6. Diet Plan</h2>
+                <p class="text-emerald-100 text-xs mb-4">Indian, No Cook, Digestive-Friendly</p>
+                <div class="bg-white/10 p-4 rounded-xl border border-white/20">
+                    <h3 class="font-bold text-lg">Protein Target: 120–140g/day</h3>
+                    <p class="text-xs uppercase tracking-widest font-bold text-emerald-300">(CRUCIAL FOR SKIN & MUSCLE)</p>
+                </div>
+            </section>
+
+            <!-- Verbatim: Daily Meal Structure -->
+            <section class="bg-white p-6 rounded-2xl shadow-sm">
+                <h2 class="text-xl font-extrabold text-slate-800 mb-6">7. Simple Daily Meal Structure (~1,650 kcal)</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Morning -->
+                    <div class="p-4 border rounded-xl hover:bg-slate-50 cursor-pointer transition-colors" onclick="showNutritionDetail('morning')">
+                        <h3 class="font-bold text-slate-800">🥣 Morning (Optional)</h3>
+                        <p class="text-xs text-gray-500">Water, lemon, coffee/tea</p>
+                    </div>
+                    <!-- Breakfast -->
+                    <div class="p-4 border rounded-xl hover:bg-slate-50 cursor-pointer transition-colors" onclick="showNutritionDetail('breakfast')">
+                        <h3 class="font-bold text-slate-800">🍳 Breakfast (400 kcal)</h3>
+                        <p class="text-xs text-gray-500">Eggs, Paneer, or Greek Yogurt</p>
+                    </div>
+                    <!-- Lunch -->
+                    <div class="p-4 border rounded-xl hover:bg-slate-50 cursor-pointer transition-colors" onclick="showNutritionDetail('lunch')">
+                        <h3 class="font-bold text-slate-800">🍛 Lunch (500 kcal)</h3>
+                        <p class="text-xs text-gray-500">Rice, Chicken, Fish or Dal + Salad</p>
+                    </div>
+                    <!-- Snack -->
+                    <div class="p-4 border rounded-xl hover:bg-slate-50 cursor-pointer transition-colors" onclick="showNutritionDetail('snack')">
+                        <h3 class="font-bold text-slate-800">☕ Snack (200 kcal)</h3>
+                        <p class="text-xs text-gray-500">Fruit, Chana or Protein Shake</p>
+                    </div>
+                    <!-- Dinner -->
+                    <div class="p-4 border rounded-xl hover:bg-slate-50 cursor-pointer transition-colors col-span-1 md:col-span-2" onclick="showNutritionDetail('dinner')">
+                        <h3 class="font-bold text-slate-800">🍽️ Dinner (400–450 kcal)</h3>
+                        <p class="text-xs text-gray-500">Light & Protein focused (No rice at night initially)</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Coach Upgrade: Workout Food -->
+            <section class="upgrade-card p-6 rounded-2xl shadow-sm">
+                <h2 class="text-lg font-bold text-emerald-900 mb-1">14. What to Eat Around Workouts</h2>
+                <span class="pdf-ref">From PDF Pages 4–6</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-sm">
+                    <div class="p-3 bg-white border rounded-xl">
+                        <p class="font-bold text-emerald-700">Before Strength:</p>
+                        <p class="text-xs">Banana, Whey or Egg Whites</p>
+                    </div>
+                    <div class="p-3 bg-white border rounded-xl">
+                        <p class="font-bold text-emerald-700">Before Walking:</p>
+                        <p class="text-xs">Black Coffee / Green Tea (Fasted is fine)</p>
+                    </div>
+                    <div class="p-3 bg-white border rounded-xl col-span-1 md:col-span-2">
+                        <p class="font-bold text-emerald-700">After Workout:</p>
+                        <p class="text-xs">Fast protein (Whey/Eggs) + Carbs (Fruit/Rice)</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Coach Upgrade: Food Lists -->
+            <section class="upgrade-card p-6 rounded-2xl shadow-sm">
+                <h2 class="text-lg font-bold text-emerald-900 mb-4">15. High-Protein Food Master List</h2>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 bg-white border border-emerald-200 rounded-full text-xs font-semibold text-emerald-800">Eggs</span>
+                    <span class="px-3 py-1 bg-white border border-emerald-200 rounded-full text-xs font-semibold text-emerald-800">Tofu</span>
+                    <span class="px-3 py-1 bg-white border border-emerald-200 rounded-full text-xs font-semibold text-emerald-800">Paneer</span>
+                    <span class="px-3 py-1 bg-white border border-emerald-200 rounded-full text-xs font-semibold text-emerald-800">Dal & Lentils</span>
+                    <span class="px-3 py-1 bg-white border border-emerald-200 rounded-full text-xs font-semibold text-emerald-800">Chickpeas</span>
+                    <span class="px-3 py-1 bg-white border border-emerald-200 rounded-full text-xs font-semibold text-emerald-800">Greek Yogurt</span>
+                    <span class="px-3 py-1 bg-white border border-emerald-200 rounded-full text-xs font-semibold text-emerald-800">Chicken Breast</span>
+                    <span class="px-3 py-1 bg-white border border-emerald-200 rounded-full text-xs font-semibold text-emerald-800">Fish (Rohu/Salmon)</span>
+                </div>
+                <h2 class="text-lg font-bold text-emerald-900 mt-6 mb-4">16. Vegetables & Healthy Fats</h2>
+                <div class="grid grid-cols-2 gap-4 text-xs">
+                    <div class="p-3 bg-white border rounded-xl">
+                        <p class="font-bold">Veg:</p>
+                        <p>Palak, Lauki, Broccoli, Bhindi, Beans, Cabbage</p>
+                    </div>
+                    <div class="p-3 bg-white border rounded-xl">
+                        <p class="font-bold">Fats:</p>
+                        <p>Almonds, Walnuts, Chia, Ghee, Mustard Oil</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Verbatim: Supplements -->
+            <section class="bg-white p-6 rounded-2xl shadow-sm">
+                <h2 class="text-xl font-extrabold text-slate-800 mb-4">9. Supplements (Optional but Helpful)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <div class="flex items-center gap-2">• <span>Whey Protein (Muscle & Skin)</span></div>
+                    <div class="flex items-center gap-2">• <span>Vitamin D3 (Deficiency check)</span></div>
+                    <div class="flex items-center gap-2">• <span>Magnesium (Sleep/Recovery)</span></div>
+                    <div class="flex items-center gap-2">• <span>Omega-3 (Brain/Inflammation)</span></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PAGE 4: PRINCIPLES & WHY -->
+        <div id="principles-page" class="page space-y-6">
+            
+            <section class="bg-white p-6 rounded-2xl shadow-sm">
+                <h2 class="text-xl font-extrabold text-slate-800 mb-6 text-center">Your Key Questions & Principles</h2>
+                
+                <div class="space-y-4">
+                    <!-- Verbatim Accordion 1 -->
+                    <div class="border rounded-xl overflow-hidden">
+                        <button class="w-full text-left p-4 font-bold bg-slate-50 flex justify-between" onclick="toggleAccordion(this)">
+                            <span>How does this help my High BP & Cholesterol?</span>
+                            <span>+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-4 text-sm text-gray-600 space-y-2">
+                                <p><strong>Low Sodium:</strong> Directly reduces blood vessel strain.</p>
+                                <p><strong>High Fiber:</strong> Soluble fiber acts as a sponge for LDL (Bad) cholesterol.</p>
+                                <p><strong>Healthy Fats:</strong> Choosing lean proteins over rich curries reduces fat intake.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Verbatim Accordion 2 -->
+                    <div class="border rounded-xl overflow-hidden">
+                        <button class="w-full text-left p-4 font-bold bg-slate-50 flex justify-between" onclick="toggleAccordion(this)">
                             <span>How do I avoid loose skin after weight loss?</span>
-                            <span>&#9660;</span>
+                            <span>+</span>
                         </button>
                         <div class="accordion-content">
-                            <div class="p-4 bg-gray-50 border rounded-b-lg">
-                                <p class="text-gray-700">This is a valid concern. Your plan is specifically designed to minimize this risk:</p>
-                                <ul class="list-disc list-inside mt-2 space-y-1">
-                                    <li><span class="font-semibold">Gradual Loss:</span> Our calorie target (~1700-1800 kcal) aims for 0.5-1kg per week. Rapid loss doesn't give your skin time to adjust. Slow and steady is the key.</li>
-                                    <li><span class="font-semibold">Strength Training:</span> This is critical! By building lean muscle (with exercises like squats, lunges, push-ups), you are building a firm layer underneath the skin. This helps "fill out" the space as fat is lost.</li>
-                                    <li><span class="font-semibold">Protein & Hydration:</span> Eating adequate protein (dal, chicken, fish, paneer) provides the building blocks for collagen, which gives skin its elasticity. Staying well-hydrated also helps skin health.</li>
-                                </ul>
+                            <div class="p-4 text-sm text-gray-600 space-y-2">
+                                <p><strong>Gradual Loss:</strong> Target of 0.5-1kg per week gives skin time to adjust.</p>
+                                <p><strong>Strength Training:</strong> Builds a firm layer underneath the skin.</p>
+                                <p><strong>Protein & Hydration:</strong> Building blocks for collagen and skin elasticity.</p>
                             </div>
                         </div>
                     </div>
-                    <!-- Item 3 -->
-                    <div>
-                        <button class="accordion-toggle flex justify-between items-center w-full p-4 bg-emerald-50 rounded-lg text-left font-semibold text-emerald-800 hover:bg-emerald-100">
-                            <span>Can I target fat in specific areas (like my belly)?</span>
-                            <span>&#9660;</span>
+
+                    <!-- Coach Upgrade: Phase System -->
+                    <div class="border-2 border-emerald-100 rounded-xl overflow-hidden">
+                        <button class="w-full text-left p-4 font-bold bg-emerald-50 text-emerald-900 flex justify-between" onclick="toggleAccordion(this)">
+                            <span>19. Phase-Based Lifestyle System (PDF)</span>
+                            <span>+</span>
                         </button>
                         <div class="accordion-content">
-                            <div class="p-4 bg-gray-50 border rounded-b-lg">
-                                <p class="text-gray-700">This is a very common question! The short answer is: <span class="font-semibold">you cannot "spot reduce" fat.</span> You can't choose *where* your body burns fat from. Doing 1000 crunches won't melt belly fat (it will just build muscle *under* the fat).</p>
-                                <p class="text-gray-700 mt-2">Here is the correct strategy, which this plan follows:</p>
-                                <ul class="list-disc list-inside mt-2 space-y-1">
-                                    <li><span class="font-semibold">Lose Overall Fat:</span> The <span class="font-semibold">Cardio</span> in your plan, combined with the <span class="font-semibold">Calorie Deficit</span> from your diet, will burn overall body fat. Your body will decide where to take it from (often the belly, or "over flat" area, is one of the last places, so be patient!).</li>
-                                    <li><span class="font-semibold">Strengthen the Core:</span> The <span class="font-semibold">Strength & Core</span> exercises (like planks, crunches) will strengthen the abdominal muscles. As the fat layer on top reduces, these toned muscles will become visible and give you a flatter, stronger midsection.</li>
-                                </ul>
+                            <div class="p-4 text-sm text-emerald-800 space-y-4">
+                                <div>
+                                    <h4 class="font-bold">Phase 1: Move Lightly</h4>
+                                    <p>Walking after meals, stairs, chores.</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Phase 2: Eat Smartly</h4>
+                                    <p>Eat slowly (15-20 min), stop at 80% fullness, protein every meal.</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Phase 3: Sleep Deeply</h4>
+                                    <p>7-8 hrs nightly, dark/cool room, phone away from bed.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Item 4 -->
-                    <div>
-                        <button class="accordion-toggle flex justify-between items-center w-full p-4 bg-emerald-50 rounded-lg text-left font-semibold text-emerald-800 hover:bg-emerald-100">
-                            <span>What about eating out in Bangalore?</span>
-                            <span>&#9660;</span>
-                        </button>
-                        <div class="accordion-content">
-                            <div class="p-4 bg-gray-50 border rounded-b-lg">
-                                <p class="text-gray-700">Living in Bangalore means great food is everywhere! You don't have to be a hermit. Use these rules:</p>
-                                <ul class="list-disc list-inside mt-2 space-y-1">
-                                    <li><span class="font-semibold">Grill > Gravy:</span> Choose Tandoori chicken/fish/paneer over rich, creamy, high-sodium curries like Butter Chicken or Korma.</li>
-                                    <li><span class="font-semibold">Ask for "No Butter/Ghee":</span> When ordering rotis, ask for them dry. Ask for dal tadka with "no ghee" or "minimal oil".</li>
-                                    <li><span class="font-semibold">Sides are Key:</span> Order a large green salad or clear soup (like rasam or veg clear soup) as a starter to fill up.</li>
-                                    <li><span class="font-semibold">Be Mindful of Millets:</span> Bangalore has great millet options (like Ragi). A Ragi Mudde with Sambar is a fantastic, high-fiber lunch, but be mindful of the portion.</li>
-                                </ul>
-                            </div>
+
+                    <!-- Verbatim: Lifestyle Rules -->
+                    <div class="bg-white p-5 rounded-xl border border-dashed border-gray-300">
+                        <h3 class="font-bold mb-3">10. Lifestyle Rules</h3>
+                        <div class="space-y-3 text-sm">
+                            <p><strong>Sleep:</strong> 7–8 hours, No screens 1 hour before bed.</p>
+                            <p><strong>Stress:</strong> Chronic stress = belly fat. 5-10 min breathing.</p>
+                            <p><strong>Alcohol:</strong> Avoid completely for 12 weeks if possible.</p>
                         </div>
                     </div>
                 </div>
+            </section>
 
+            <div class="bg-emerald-900 text-white p-6 rounded-2xl text-center">
+                <h3 class="font-bold text-lg mb-2">12. Final Coach Advice</h3>
+                <p class="text-sm text-emerald-200">Consistency > Perfection. Measure progress by waist + photos, not just scale.</p>
+                <p class="text-[10px] mt-4 opacity-50 uppercase tracking-widest font-bold">Verified Complete Plan</p>
             </div>
         </div>
 
     </main>
 
-    <!-- Nutrition Modals -->
-    <!-- Early Morning -->
-    <div id="modal-early" class="modal-backdrop hidden">
-        <div class="modal-content p-6 rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3">
-            <h3 class="text-xl font-bold text-emerald-700 mb-4">Early Morning (6:00 - 6:30 AM)</h3>
-            <ul class="list-disc list-inside space-y-2 mb-4">
-                <li>1 glass of lukewarm water with half a lemon.</li>
-                <li>OR 1 glass of Jeera (cumin) water.</li>
-                <li>OR 1 glass of Fenugreek (methi) water.</li>
-            </ul>
-            <p class="text-sm font-medium text-blue-600 mb-4">
-                <span class="font-bold">Why:</span> This kick-starts your metabolism, aids digestion, and helps to hydrate you after a long sleep.
-            </p>
-            <button class="modal-close-btn bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">Close</button>
+    <!-- MODAL FOR NUTRITION DETAILS -->
+    <div id="detailModal" class="modal-backdrop hidden" onclick="closeDetailModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 id="modalTitle" class="text-2xl font-extrabold text-slate-800 mb-4"></h2>
+            <div id="modalBody" class="text-sm text-gray-600 leading-relaxed space-y-4"></div>
+            <button class="mt-8 w-full bg-slate-800 text-white py-3 rounded-xl font-bold" onclick="closeDetailModal()">Close</button>
         </div>
     </div>
-    <!-- Breakfast -->
-    <div id="modal-breakfast" class="modal-backdrop hidden">
-        <div class="modal-content p-6 rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3">
-            <h3 class="text-xl font-bold text-emerald-700 mb-4">Breakfast (8:00 - 8:30 AM)</h3>
-            <p class="mb-3 font-semibold text-red-600">Health-First Tip: Use minimal salt and oil in all options.</p>
-            <ul class="list-disc list-inside space-y-2 mb-4">
-                <li>1 bowl of Oats porridge (approx 40g dry oats) with fruits/nuts.</li>
-                <li>1 plate of Poha (use minimal oil, add lots of vegetables).</li>
-                <li>1 bowl of Upma (semolina or millet) with vegetables.</li>
-                <li>2-3 egg-white omelette with vegetables (no cheese).</li>
-                <li>2 Moong Dal Cheela (pancakes) with mint chutney.</li>
-            </ul>
-            <p class="text-sm font-medium text-blue-600 mb-4">
-                <span class="font-bold">Why:</span> A high-fiber, high-protein breakfast keeps you full, controls blood sugar, and (especially oats) actively helps lower cholesterol.
-            </p>
-            <button class="modal-close-btn bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">Close</button>
-        </div>
-    </div>
-    <!-- Mid-Morning Snack -->
-    <div id="modal-mid-snack" class="modal-backdrop hidden">
-        <div class="modal-content p-6 rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3">
-            <h3 class="text-xl font-bold text-emerald-700 mb-4">Mid-Morning Snack (11:00 AM)</h3>
-            <ul class="list-disc list-inside space-y-2 mb-4">
-                <li>1 medium fruit (Apple, Orange, Pear, or 1 bowl Papaya).</li>
-                <li>OR a handful (10-12) of unsalted Almonds or Walnuts.</li>
-            </ul>
-            <p class="text-sm font-medium text-blue-600 mb-4">
-                <span class="font-bold">Why:</span> Prevents you from getting ravenously hungry by lunch. Fruit provides fiber, and nuts provide healthy fats that are good for your heart (in moderation).
-            </p>
-            <button class="modal-close-btn bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">Close</button>
-        </div>
-    </div>
-    <!-- Lunch -->
-    <div id="modal-lunch" class="modal-backdrop hidden">
-        <div class="modal-content p-6 rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3">
-            <h3 class="text-xl font-bold text-emerald-700 mb-4">Lunch (1:00 - 1:30 PM)</h3>
-            <p class="mb-3 font-semibold text-red-600">Health-First Tip: Make the salad the biggest portion on your plate!</p>
-            <ul class="list-disc list-inside space-y-2 mb-4">
-                <li>2 small Multigrain Rotis (or 1 bowl Ragi Mudde).</li>
-                <li>1 bowl Sabzi (mixed vegetables - cooked with minimal oil/salt).</li>
-                <li>1 bowl Dal (lentils - no heavy tadka).</li>
-                <li>1 large bowl of raw Salad (cucumber, tomato, onion, carrot).</li>
-                <li>(Optional: 1 small bowl of low-fat curd).</li>
-            </ul>
-            <p class="text-sm font-medium text-blue-600 mb-4">
-                <span class="font-bold">Why:</span> A perfectly balanced meal. Fiber (roti, sabzi, salad) and Protein (dal) keep you full and help cholesterol. The salad provides volume with few calories.
-            </p>
-            <button class="modal-close-btn bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">Close</button>
-        </div>
-    </div>
-    <!-- Evening Snack -->
-    <div id="modal-eve-snack" class="modal-backdrop hidden">
-        <div class="modal-content p-6 rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3">
-            <h3 class="text-xl font-bold text-emerald-700 mb-4">Evening Snack (4:00 - 4:30 PM)</h3>
-            <ul class="list-disc list-inside space-y-2 mb-4">
-                <li>1 cup of Green Tea (no sugar).</li>
-                <li>WITH a handful of roasted Chana (unsalted).</li>
-                <li>OR 1 bowl of boiled Sprouts chaat (add lemon, no salt).</li>
-            </ul>
-            <p class="text-sm font-medium text-blue-600 mb-4">
-                <span class="font-bold">Why:</span> This is the "danger zone" for unhealthy snacking. This protein/fiber snack prevents cravings and gives you energy for the evening.
-            </p>
-            <button class="modal-close-btn bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">Close</button>
-        </div>
-    </div>
-    <!-- Dinner -->
-    <div id="modal-dinner" class="modal-backdrop hidden">
-        <div class="modal-content p-6 rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3">
-            <h3 class="text-xl font-bold text-emerald-700 mb-4">Dinner (7:00 - 7:30 PM)</h3>
-            <p class="mb-3 font-semibold text-red-600">Health-First Tip: Keep dinner light and early. This is key for weight loss.</p>
-            <ul class="list-disc list-inside space-y-2 mb-4">
-                <li>1 bowl of Mixed Vegetable Soup (clear, not creamy) AND 1 bowl of Vegetable Khichdi (use less rice, more dal/veg).</li>
-                <li>OR 100g Grilled Chicken Breast or Fish with lots of sautéed vegetables.</li>
-                <li>OR 1 bowl of Sambar with 1-2 small Idlis (or just the Sambar with vegetables).</li>
-            </ul>
-            <p class="text-sm font-medium text-blue-600 mb-4">
-                <span class="font-bold">Why:</span> A light, low-carb dinner is easier to digest and prevents fat storage overnight. The protein helps muscle repair while you sleep.
-            </p>
-            <button class="modal-close-btn bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">Close</button>
-        </div>
-    </div>
-    <!-- Bedtime -->
-    <div id="modal-bedtime" class="modal-backdrop hidden">
-        <div class="modal-content p-6 rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3">
-            <h3 class="text-xl font-bold text-emerald-700 mb-4">Bedtime (9:00 - 9:30 PM)</h3>
-            <ul class="list-disc list-inside space-y-2 mb-4">
-                <li>1 glass of warm low-fat milk with a pinch of turmeric (Haldi). (No sugar).</li>
-            </ul>
-            <p class="text-sm font-medium text-blue-600 mb-4">
-                <span class="font-bold">Why:</span> Turmeric has anti-inflammatory properties, and the warm milk can help you sleep better. Good sleep is essential for weight loss and recovery.
-            </p>
-            <button class="modal-close-btn bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">Close</button>
-        </div>
-    </div>
-
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            
-            // --- Global State ---
+            const navItems = document.querySelectorAll('.nav-item');
             const pages = document.querySelectorAll('.page');
-            const navButtons = document.querySelectorAll('.nav-item');
             let weightChart;
-            let chartData = {
-                labels: ['Start'],
-                datasets: [{
-                    label: 'Your Weight (kg)',
-                    data: [107],
-                    borderColor: '#059669',
-                    backgroundColor: 'rgba(5, 150, 105, 0.1)',
-                    fill: true,
-                    tension: 0.1
-                }]
-            };
 
-            // --- Chart.js ---
-            function initChart() {
+            // Chart Initialization
+            const initChart = () => {
                 const ctx = document.getElementById('weightChart').getContext('2d');
                 weightChart = new Chart(ctx, {
                     type: 'line',
-                    data: chartData,
+                    data: {
+                        labels: ['Week 0'],
+                        datasets: [{
+                            label: 'Weight (kg)',
+                            data: [107],
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: false,
-                                title: {
-                                    display: true,
-                                    text: 'Weight (kg)'
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Date'
-                                }
-                            }
-                        },
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return `Weight: ${context.parsed.y} kg`;
-                                    }
-                                }
-                            }
-                        }
+                        scales: { y: { beginAtZero: false } }
                     }
                 });
-            }
+            };
 
-            function updateChart(label, weight) {
-                chartData.labels.push(label);
-                chartData.datasets[0].data.push(weight);
-                weightChart.update();
-            }
-
-            // --- Weight Add Button ---
-            const addWeightBtn = document.getElementById('addWeightBtn');
-            const weightInput = document.getElementById('weightInput');
-            const weightError = document.getElementById('weightError');
-
-            addWeightBtn.addEventListener('click', () => {
-                const weight = parseFloat(weightInput.value);
-                if (isNaN(weight) || weight < 40 || weight > 200) {
-                    weightError.textContent = 'Please enter a valid weight (e.g., 106.5)';
-                    weightError.classList.remove('hidden');
-                    return;
-                }
-                
-                weightError.classList.add('hidden');
-                const today = new Date();
-                const label = `${today.getDate()}/${today.getMonth() + 1}`;
-                updateChart(label, weight);
-                weightInput.value = '';
+            // Navigation
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    navItems.forEach(i => i.classList.remove('nav-active'));
+                    item.classList.add('nav-active');
+                    
+                    const target = item.dataset.page;
+                    pages.forEach(p => p.classList.remove('active'));
+                    document.getElementById(`${target}-page`).classList.add('active');
+                });
             });
 
-            // --- Page Navigation ---
-            function showPage(pageId) {
-                pages.forEach(page => {
-                    page.classList.remove('active');
-                    if (page.id === `${pageId}-page`) {
-                        page.classList.add('active');
-                    }
-                });
-                
-                navButtons.forEach(btn => {
-                    btn.classList.remove('nav-active');
-                    if (btn.dataset.page === pageId) {
-                        btn.classList.add('nav-active');
-                    }
-                });
-
-                if (pageId === 'home' && !weightChart) {
-                    initChart();
-                }
-            }
-
-            document.querySelector('nav').addEventListener('click', (e) => {
-                if (e.target.matches('.nav-item')) {
-                    showPage(e.target.dataset.page);
+            // Weight Log
+            document.getElementById('addWeightBtn').addEventListener('click', () => {
+                const val = parseFloat(document.getElementById('weightInput').value);
+                if (val > 40 && val < 200) {
+                    weightChart.data.labels.push(`W${weightChart.data.labels.length}`);
+                    weightChart.data.datasets[0].data.push(val);
+                    weightChart.update();
+                    document.getElementById('weightInput').value = '';
                 }
             });
 
-            // Set initial active page
-            showPage('home');
-
-            // --- Nutrition Modals ---
-            const mealCards = document.querySelectorAll('.meal-card');
-            const closeButtons = document.querySelectorAll('.modal-close-btn');
-
-            function showModal(modalId) {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.classList.remove('hidden');
-                }
-            }
-
-            function hideAllModals() {
-                document.querySelectorAll('.modal-backdrop').forEach(modal => {
-                    modal.classList.add('hidden');
-                });
-            }
-
-            mealCards.forEach(card => {
-                card.addEventListener('click', () => {
-                    showModal(card.dataset.modal);
-                });
-            });
-
-            closeButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    btn.closest('.modal-backdrop').classList.add('hidden');
-                });
-            });
-            
-            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-                backdrop.addEventListener('click', (e) => {
-                    if (e.target === backdrop) {
-                        hideAllModals();
-                    }
-                });
-            });
-
-            // --- Exercise Day Toggles ---
-            const dayButtons = document.querySelectorAll('.ex-day-btn');
-            const workoutDays = document.querySelectorAll('.workout-day');
-
-            dayButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    // Update button styles
-                    dayButtons.forEach(b => {
-                        b.classList.remove('bg-emerald-600', 'text-white');
-                        b.classList.add('bg-gray-200', 'text-gray-700');
-                    });
-                    btn.classList.add('bg-emerald-600', 'text-white');
-                    btn.classList.remove('bg-gray-200', 'text-gray-700');
-
-                    // Show content
-                    const dayId = btn.dataset.day;
-                    workoutDays.forEach(day => {
-                        day.classList.add('hidden');
-                        if (day.id === dayId) {
-                            day.classList.remove('hidden');
-                        }
-                    });
-                });
-            });
-
-            // --- Accordion ---
-            const accordionToggles = document.querySelectorAll('.accordion-toggle');
-            accordionToggles.forEach(toggle => {
-                toggle.addEventListener('click', () => {
-                    const content = toggle.nextElementSibling;
-                    const isOpen = content.classList.contains('open');
-
-                    // Optional: Close all other accordions
-                    // document.querySelectorAll('.accordion-content.open').forEach(openContent => {
-                    //     if (openContent !== content) {
-                    //         openContent.classList.remove('open');
-                    //         openContent.previousElementSibling.querySelector('span:last-child').innerHTML = '&#9660;';
-                    //     }
-                    // });
-
-                    content.classList.toggle('open');
-                    toggle.querySelector('span:last-child').innerHTML = isOpen ? '&#9660;' : '&#9650;';
-                });
-            });
-
+            initChart();
         });
-    </script>
 
+        function toggleAccordion(btn) {
+            const content = btn.nextElementSibling;
+            content.classList.toggle('open');
+            btn.querySelector('span:last-child').innerText = content.classList.contains('open') ? '-' : '+';
+        }
+
+        const nutritionData = {
+            morning: {
+                title: "🥣 Morning (6:00 - 6:30 AM)",
+                body: "Warm water + pinch of salt + lemon. Black coffee / green tea (no sugar). <br><br><strong>Why:</strong> Kick-starts metabolism and hydrates after sleep."
+            },
+            breakfast: {
+                title: "🍳 Breakfast (400 kcal)",
+                body: "<strong>Choose ONE:</strong><br>• 3 eggs omelette + veggies<br>• Paneer bhurji (150 g)<br>• Greek yogurt / hung curd + nuts<br>• Moong dal chilla (2)"
+            },
+            lunch: {
+                title: "🍛 Lunch (500 kcal)",
+                body: "<strong>Choose ONE:</strong><br>• Rice (100 g cooked) + dal + sabzi<br>• Chicken breast (150 g) + veggies<br>• Fish curry + small rice portion<br>• Paneer + salad + curd<br><br><strong>Note:</strong> Add raw salad + curd daily for digestion."
+            },
+            snack: {
+                title: "☕ Snack (200 kcal)",
+                body: "• Fruit + roasted chana<br>• Protein shake (water based)<br>• Buttermilk + peanuts"
+            },
+            dinner: {
+                title: "🍽️ Dinner (400–450 kcal)",
+                body: "<strong>Keep it light:</strong><br>• Paneer / tofu stir-fry<br>• Egg bhurji + veggies<br>• Chicken soup + salad<br>• Dal + vegetables<br><br><strong>Rule:</strong> No rice at night initially."
+            }
+        };
+
+        function showNutritionDetail(key) {
+            const data = nutritionData[key];
+            document.getElementById('modalTitle').innerText = data.title;
+            document.getElementById('modalBody').innerHTML = data.body;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
